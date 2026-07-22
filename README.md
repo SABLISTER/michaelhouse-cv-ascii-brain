@@ -23,9 +23,10 @@ npm run build    # production build -> dist/
 ## Deployment notes
 
 - Facility detail pages are client-side routes (`/facility/:slug`). On static hosting, add an SPA fallback to `index.html` (the previous site already ships a `404.html` fallback on GitHub Pages).
-- Binary assets (images in `public/images/`, videos in `public/videos/`) are **not tracked in this repo** — they are AI-generated monochrome assets that currently live on the build machine. Re-add them before deploying:
-  - `public/images/`: `facility-cmi.jpg`, `facility-pni.jpg`, `facility-msu.jpg`, `facility-imaf.jpg`, `archive-ei.jpg`, `archive-rnn.jpg`, `archive-martial.jpg`, `archive-bangladesh.jpg`
+- Binary assets (images in `public/images/`, videos in `public/videos/`) are **not tracked in this repo** — they currently live on the build machine. Re-add them before deploying:
+  - `public/images/`: `facility-cmi.jpg`, `facility-pni.jpg`, `facility-msu.jpg`, `facility-imaf.jpg`, `archive-ei.jpg`, `archive-rnn.jpg`, `archive-martial.jpg`, `archive-bangladesh.jpg`, `archive-ascii.jpg`
   - `public/videos/`: `manifesto.mp4`, `observation.mp4`
+- `archive-ascii.jpg` is the BLADE block-art portrait from the GitHub profile README (`SABLISTER/pleasesendgrants/github-profile-README.md`), rendered to a 3:4 monochrome image.
 - The scaffold this was built from ships 55 pre-installed shadcn/ui components; the app itself imports none of them, so they are omitted here. Regenerate any of them with `npx shadcn@latest add <component>` if needed.
 
 ## Content map
@@ -36,7 +37,7 @@ npm run build    # production build -> dist/
 | Manifesto | Personal statement (quote from CV) |
 | Affiliations & Experience | Child Mind Institute · Simons Foundation/PNI · MSU Autism & Neurodevelopment Lab · IMAF & H Consulting |
 | Signal Acquisition | Live-styled 64-ch EEG feed (looping video) |
-| Selected Publications | Four posters/chapters from the CV |
+| Selected Publications | Four posters/chapters from the CV + the BLADE ASCII portrait (personal favorite) |
 | Footer | Contact + domain |
 
 The old site at `SABLISTER/pleasesendgrants` is untouched.
