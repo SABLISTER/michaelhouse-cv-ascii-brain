@@ -297,12 +297,13 @@ export default function Archives() {
         style={{
           position: 'fixed',
           inset: 0,
-          padding: '0 15vw',
+          padding: '60px 15vw',
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '24px',
           alignContent: 'center',
           justifyItems: 'center',
+          overflowY: 'auto',
           opacity: previewOpen ? 1 : 0,
           pointerEvents: previewOpen ? 'auto' : 'none',
           zIndex: 100,
@@ -362,7 +363,7 @@ export default function Archives() {
               alt={item.label}
               style={{
                 width: '100%',
-                maxWidth: '400px',
+                maxWidth: '320px',
                 height: 'auto',
                 display: 'block',
                 filter: 'grayscale(100%)',
