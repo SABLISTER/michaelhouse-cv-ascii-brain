@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { manifestoConfig } from '../config';
 
@@ -7,46 +7,50 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Manifesto() {
   const sectionRef = useRef<HTMLElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
   const videoRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Text animation - clip reveal from left
-      if (textRef.current) {
-        gsap.fromTo(
-          textRef.current,
-          { clipPath: 'inset(0 100% 0 0)' },
-          {
-            clipPath: 'inset(0 0% 0 0)',
-            duration: 1.5,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: textRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
+  if (!manifestoConfig.text && !manifestoConfig.videoPath) {
+    return null;
+  }
 
-      // Video animation - clip reveal from right
-      if (videoRef.current) {
-        gsap.fromTo(
-          videoRef.current,
-          { clipPath: 'inset(0 0 0 100%)' },
-          {
-            clipPath: 'inset(0 0 0 0%)',
-            duration: 1.5,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: videoRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
+  useEffect(() => {
+    if (!sectionRef.current || !textRef.current || !videoRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        videoRef.current,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%',
+            end: 'top 30%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      gsap.fromTo(
+        textRef.current,
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%',
+            end: 'top 30%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -54,49 +58,80 @@ export default function Manifesto() {
 
   return (
     <section
-      id="manifesto"
       ref={sectionRef}
-      className="relative w-full bg-white flex flex-col md:flex-row"
-      style={{ minHeight: '70vh' }}
+      id="manifesto"
+      style={{
+        background: '#ffffff',
+        color: '#000000',
+        padding: '160px 40px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',
+      }}
     >
-      {/* Left Side - Text Content */}
       <div
-        ref={textRef}
-        className="w-full md:w-1/2 flex items-center p-8 md:p-16 lg:p-24"
+        style={{
+          width: '100%',
+          maxWidth: '1360px',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(320px, 46%) minmax(320px, 1fr)',
+          gap: '64px',
+          alignItems: 'center',
+        }}
       >
-        <div className="max-w-xl">
-          <p
-            className="text-black text-lg md:text-2xl lg:text-3xl leading-relaxed md:leading-relaxed lg:leading-relaxed"
-            style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+        {manifestoConfig.videoPath ? (
+          <div
+            ref={videoRef}
+            style={{
+              opacity: 0,
+            }}
           >
-            {manifestoConfig.text}
-          </p>
-        </div>
-      </div>
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                aspectRatio: '16 / 9',
+                overflow: 'hidden',
+                background: '#000',
+              }}
+            >
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              >
+                <source src={manifestoConfig.videoPath} type="video/mp4" />
+              </video>
+            </div>
+          </div>
+        ) : (
+          <div ref={videoRef} />
+        )}
 
-      {/* Right Side - Video */}
-      <div
-        ref={videoRef}
-        className="w-full md:w-1/2 relative overflow-hidden"
-        style={{ minHeight: '50vh' }}
-      >
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src={manifestoConfig.videoPath} type="video/mp4" />
-        </video>
-
-        {/* Scan line overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
+        <p
+          ref={textRef}
           style={{
-            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '15px',
+            fontWeight: 400,
+            lineHeight: '25px',
+            maxWidth: '680px',
+            textAlign: 'left',
+            margin: 0,
+            opacity: 0,
           }}
-        ></div>
+        >
+          {manifestoConfig.text}
+        </p>
       </div>
     </section>
   );

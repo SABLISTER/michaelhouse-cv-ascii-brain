@@ -1,84 +1,168 @@
 import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { observationConfig } from '../config';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Observation() {
   const sectionRef = useRef<HTMLElement>(null);
-  const coordinatesRef = useRef<HTMLDivElement>(null);
-  const [coordinates, setCoordinates] = useState({
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [coords, setCoords] = useState({
     lat: observationConfig.initialLat,
     lon: observationConfig.initialLon,
   });
 
-  // Simulate live coordinate updates
+  useEffect(() => {
+    setCoords({
+      lat: observationConfig.initialLat,
+      lon: observationConfig.initialLon,
+    });
+  }, [observationConfig.initialLat, observationConfig.initialLon]);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setCoordinates({
-        lat: observationConfig.initialLat + (Math.random() - 0.5) * 0.5,
-        lon: observationConfig.initialLon + (Math.random() - 0.5) * 0.5,
-      });
-    }, 2000);
-
+      setCoords((prev) => ({
+        lat: parseFloat((prev.lat + (Math.random() - 0.5) * 0.02).toFixed(2)),
+        lon: parseFloat((prev.lon + (Math.random() - 0.5) * 0.03).toFixed(2)),
+      }));
+    }, 800);
     return () => clearInterval(interval);
   }, []);
 
-  // Entrance animation
   useEffect(() => {
-    if (!coordinatesRef.current) return;
+    if (!sectionRef.current) return;
 
-    gsap.fromTo(
-      coordinatesRef.current,
-      { opacity: 0, x: 30 },
-      { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out', delay: 0.3 }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        videoRef.current,
+        { opacity: 0, scale: 0.95 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 1.5,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 60%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
+  if (!observationConfig.sectionLabel && !observationConfig.videoPath) {
+    return null;
+  }
+
   return (
-    <section id="observation" ref={sectionRef} className="relative w-full bg-black" style={{ height: '100vh' }}>
-      {/* Section Label - Top Right */}
-      <div className="absolute top-8 right-8 md:top-12 md:right-12 text-[10px] md:text-xs text-white/60 tracking-widest uppercase z-20">
-        {observationConfig.sectionLabel}
-      </div>
-
-      {/* Full Screen Video */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+    <section
+      ref={sectionRef}
+      id="observation"
+      style={{
+        background: '#000',
+        color: '#fff',
+        padding: '120px 40px',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <h3
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: '17.5px',
+          fontWeight: 400,
+          lineHeight: '20px',
+          textTransform: 'uppercase',
+          color: '#fff',
+          margin: '0 0 48px 0',
+          alignSelf: 'flex-start',
+        }}
       >
-        <source src={observationConfig.videoPath} type="video/mp4" />
-      </video>
+        {observationConfig.sectionLabel}
+      </h3>
 
-      {/* Content Overlay */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-between p-6 md:p-10">
-        {/* Status Badge */}
-        <div className="flex justify-center mt-16 md:mt-20">
-          <div className="bg-black/50 backdrop-blur-sm px-4 py-2 border border-white/20 flex items-center gap-2">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-            <span className="text-white text-[10px] md:text-xs tracking-widest uppercase">
-              {observationConfig.statusText}
-            </span>
-          </div>
-        </div>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '1200px',
+        }}
+      >
+        {observationConfig.videoPath && (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              aspectRatio: '16/9',
+              objectFit: 'cover',
+              opacity: 0,
+            }}
+          >
+            <source src={observationConfig.videoPath} type="video/mp4" />
+          </video>
+        )}
 
-        {/* Bottom Right - Live Coordinates */}
         <div
-          ref={coordinatesRef}
-          className="absolute bottom-6 right-6 md:bottom-10 md:right-10 text-right"
+          style={{
+            position: 'absolute',
+            bottom: '16px',
+            right: '16px',
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '12px',
+            fontWeight: 400,
+            color: '#fff',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            background: 'rgba(0,0,0,0.5)',
+            padding: '6px 10px',
+          }}
         >
-          <div className="text-white/80 text-xs md:text-sm tracking-wider space-y-1" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-            <div className="flex items-center justify-end gap-2">
-              <span className="text-white/40">{observationConfig.latLabel}</span>
-              <span className="tabular-nums">{coordinates.lat.toFixed(4)}</span>
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <span className="text-white/40">{observationConfig.lonLabel}</span>
-              <span className="tabular-nums">{coordinates.lon.toFixed(4)}</span>
-            </div>
-          </div>
+          {observationConfig.latLabel} {coords.lat.toFixed(2)}, {observationConfig.lonLabel} {coords.lon.toFixed(2)}
         </div>
+
+        {observationConfig.statusText && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '16px',
+              left: '16px',
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '12px',
+              fontWeight: 400,
+              color: '#fff',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: '#fff',
+                display: 'inline-block',
+                animation: 'pulse 2s ease-in-out infinite',
+              }}
+            />
+            {observationConfig.statusText}
+          </div>
+        )}
       </div>
     </section>
   );
