@@ -238,6 +238,10 @@ export const archivesConfig: ArchivesConfig = {
       src: "/images/archive-bangladesh.jpg",
       label: "Legal & Institutional Barriers to Justice and Accountability · Change and Justice in Bangladesh, 2025",
     },
+    {
+      src: "/images/archive-ascii.jpg",
+      label: "BLADE — ASCII Portrait · Personal Favorite, github.com/SABLISTER",
+    },
   ],
 }
 
